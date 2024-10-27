@@ -1,25 +1,31 @@
 <template>
   <div id="app">
-    <Header />
-    <Footer />
+    <header>
+      <nav>
+        <router-link to="/">Home</router-link> |
+        <router-link to="/catalog">Catalog</router-link> |
+        <router-link to="/book">Book</router-link>|
+        <router-link to="/borrow-cart">borrow cart</router-link>|
+        <router-link to="/profile">profile</router-link>|
+        <router-link to="/checkout">checkout</router-link>
+      </nav>
+    </header>
+    <main>
+      <!-- Nội dung các trang sẽ được hiển thị ở đây -->
+      <router-view></router-view>
+    </main>
+    <footer>
+      <p>&copy; 2024 BookBorrow</p>
+    </footer>
   </div>
 </template>
 
 <script>
-import Header from './components/Header.vue';
-import Footer from './components/Footer.vue';
-
 export default {
-  components: {
-    Header,
-    Footer
-  }
+  name: "App",
 };
 </script>
 
 <style>
-/* Style toàn cục cho ứng dụng */
-#app {
-  font-family: Arial, sans-serif;
-}
+/* CSS cho toàn ứng dụng */
 </style>
