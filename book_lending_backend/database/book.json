@@ -1,0 +1,38 @@
+[
+  {
+    "title": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "genre": "Historical Fiction",
+    "totalCopies": 7,
+    "availableCopies": 5,
+    "rating": 4.9,
+    "status": "available"
+  },
+  {
+    "title": "1984",
+    "author": "George Orwell",
+    "genre": "Dystopian",
+    "totalCopies": 5,
+    "availableCopies": 2,
+    "rating": 4.7,
+    "status": "available"
+  },
+  {
+    "title": "Moby Dick",
+    "author": "Herman Melville",
+    "genre": "Adventure",
+    "totalCopies": 4,
+    "availableCopies": 4,
+    "rating": 4.1,
+    "status": "available"
+  },
+  {
+    "title": "Pride and Prejudice",
+    "author": "Jane Austen",
+    "genre": "Romance",
+    "totalCopies": 6,
+    "availableCopies": 0,
+    "rating": 4.8,
+    "status": "unavailable"
+  }
+]

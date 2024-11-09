@@ -1,0 +1,68 @@
+[
+    {
+        "userFullName": "John Doe",
+        "idStudent": "S3512",
+        "dayOfBirth": "2/06/1997",
+        "gender": false,
+        "phoneNumber": "+18111658411",
+        "role": "user",
+        "favoriteBooks": [
+            "625b4c6ffbd88e001f58a955"
+        ],
+        "address": "Street 64, City 26"
+    },
+    {
+        "userFullName": "Charlie Lee",
+        "idStudent": "S9037",
+        "dayOfBirth": "5/09/1990",
+        "gender": false,
+        "phoneNumber": "+19921586235",
+        "role": "user",
+        "favoriteBooks": [
+            "625b4c6ffbd88e001f58a967",
+            "625b4c6ffbd88e001f58a918",
+            "625b4c6ffbd88e001f58a918"
+        ],
+        "address": "Street 86, City 39"
+    },
+    {
+        "userFullName": "Charlie Lee",
+        "idStudent": "S7505",
+        "dayOfBirth": "23/04/1998",
+        "gender": false,
+        "phoneNumber": "+14276506482",
+        "role": "user",
+        "favoriteBooks": [
+            "625b4c6ffbd88e001f58a967",
+            "625b4c6ffbd88e001f58a920"
+        ],
+        "address": "Street 66, City 34"
+    },
+    {
+        "userFullName": "Charlie Lee",
+        "idStudent": "S9354",
+        "dayOfBirth": "18/09/1995",
+        "gender": true,
+        "phoneNumber": "+14196413013",
+        "role": "user",
+        "favoriteBooks": [
+            "625b4c6ffbd88e001f58a960",
+            "625b4c6ffbd88e001f58a918",
+            "625b4c6ffbd88e001f58a960"
+        ],
+        "address": "Street 69, City 37"
+    },
+    {
+        "userFullName": "Alice Smith",
+        "idStudent": "S9248",
+        "dayOfBirth": "28/02/1995",
+        "gender": false,
+        "phoneNumber": "+11495201914",
+        "role": "user",
+        "favoriteBooks": [
+            "625b4c6ffbd88e001f58a955",
+            "625b4c6ffbd88e001f58a955"
+        ],
+        "address": "Street 64, City 4"
+    }
+]
