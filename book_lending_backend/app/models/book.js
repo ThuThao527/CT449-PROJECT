@@ -11,35 +11,31 @@ const BookSchema = new mongoose.Schema({
   },
   genre: [{
     type: String,
-    enum: ['Fiction', 'Adventure', 'Mystery', 'Romance', 'Science fiction', 'Fantasy',
-    'Thriller', 'Historical fiction', 'Dystopian', 'Horror', 'Satire',
-    'Non-fiction', 'Biography', 'Autobiography', 'Memoir', 'Self-help', 'Health',
-    'True crime', 'Philosophy', 'Psychology', 'Travel', 'Science', 'History',
-    'Politics', 'Children', 'Picture books', 'Early reader', 'Middle grade',
-    'Young adult', 'Educational', 'Textbooks', 'Academic', 'Reference',
-    'Language learning', 'Mathematics', 'Engineering', 'Computer science',
-    'Business', 'Entrepreneurship', 'Marketing', 'Management', 'Finance',
-    'Economics', 'Investing', 'Religion', 'Buddhism', 'Christianity', 'Islam',
-    'Spirituality', 'New age', 'Lifestyle', 'Cooking', 'Gardening', 'Home improvement',
-    'Fashion', 'Art', 'Photography', 'Poetry', 'Essays', 'Short stories', 'Anthology',
-    'Graphic novels', 'Comics', 'Drama'],
     required: true,
   }],
-  totalCopies: { // Tổng số lượng sách trong thư viện
+  language: {
+    type: String,
+    required: false,
+  },
+  totalCopies: {
     type: Number,
     required: true,
   },
-  availableCopies: { // Số lượng sách hiện có
+  availableCopies: {
     type: Number,
     required: true,
   },
-  rating: { // Đánh giá 5 sao
+  rating: {
     type: Number,
     min: 0,
     max: 5,
     default: 0,
   },
-  status: { // Tình trạng sách (còn hay hết)
+  publicationDate: {
+    type: Date,
+    required: false,
+  },
+  status: {
     type: String,
     enum: ['available', 'unavailable'],
     default: 'available',
@@ -49,12 +45,24 @@ const BookSchema = new mongoose.Schema({
     required: false,
   },
   images: [{
-    type: String,
-
-  }]
+    type: String, // Lưu đường dẫn của ảnh
+  }],
+  position: {
+    floor: {
+      type: Number,
+      required: true,
+    },
+    shelf: {
+      type: String,
+      required: true,
+    },
+    section: {
+      type: String,
+      required: false,
+    },
+  }
 });
 
-// Middleware để cập nhật status dựa trên availableCopies
 BookSchema.pre('save', function(next) {
   if (this.availableCopies === 0) {
     this.status = 'unavailable';
@@ -65,4 +73,3 @@ BookSchema.pre('save', function(next) {
 });
 
 module.exports = mongoose.model('Book', BookSchema);
- 

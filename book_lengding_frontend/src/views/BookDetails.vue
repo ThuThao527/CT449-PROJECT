@@ -1,99 +1,135 @@
 <template>
-  <div class="book-details-page container py-5">
-    <!-- Book Information -->
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <!-- Cover Image -->
-        <img :src="book.coverImage" alt="Book Cover" class="img-fluid rounded shadow" />
-      </div>
-      <div class="col-md-8">
-        <!-- Details -->
-        <h1 class="display-5">{{ book.title }}</h1>
-        <p class="text-muted">by {{ book.author }}</p>
-        <p><strong>Genre:</strong> {{ book.genre }}</p>
-        <p><strong>Publish Date:</strong> {{ book.publishDate }}</p>
-        <p>
-          <strong>Status:</strong>
-          <span :class="book.availability === 'Available' ? 'text-success' : 'text-danger'">
-            {{ book.availability }}
-          </span>
-        </p>
-        
-        <!-- Description -->
-        <p class="mt-3">{{ book.description }}</p>
-
-        <!-- Borrow Button -->
-        <button class="btn btn-primary btn-lg mt-4" @click="addToBorrowCart(book)">
-          Borrow This Book
-        </button>
+  <div class="book-detail-container p-4">
+    <div class="book-detail-card">
+      <img :src="book.coverImage" class="book-cover-image" :alt="book.title">
+      <div class="book-info">
+        <h2>{{ book.title }}</h2>
+        <p><strong>Author:</strong> {{ book.author }}</p>
+        <p><strong>Genre:</strong> {{ book.genre.join(', ') }}</p>
+        <p><strong>Language:</strong> {{ book.language }}</p>
+        <p><strong>Publication Date:</strong> {{ formattedPublicationDate }}</p>
+        <p><strong>Available Copies:</strong> {{ book.availableCopies }}</p>
+        <p><strong>Status:</strong> {{ book.status }}</p>
+        <p><strong>Description:</strong> {{ book.description }}</p>
+        <div class="borrow-button-container">
+          <button class="btn btn-primary" @click="openBorrowForm">Borrow Book</button>
+        </div>
       </div>
     </div>
-
-    <!-- Similar Books Carousel -->
-    <h3>Similar Books</h3>
-    <div class="similar-books-carousel mt-3">
-      <div v-for="similarBook in similarBooks" :key="similarBook.id" class="carousel-item">
-        <img :src="similarBook.coverImage" alt="Similar Book Cover" class="img-thumbnail" />
-        <h5 class="mt-2">{{ similarBook.title }}</h5>
-        <p class="text-muted">{{ similarBook.author }}</p>
-      </div>
+    
+    <!-- Form Mượn Sách -->
+    <div v-if="showBorrowForm" class="borrow-form">
+      <h4>Borrow Book</h4>
+      <form @submit.prevent="borrowBook">
+        <div class="form-group">
+          <label for="borrowerName">Your Name</label>
+          <input type="text" v-model="borrowerName" id="borrowerName" required />
+        </div>
+        <button type="submit" class="btn btn-success">Submit</button>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
+import apiClient from '@/axios';
+
 export default {
-  name: "BookDetails",
+  name: 'BookDetail',
   data() {
     return {
-      book: {
-        id: this.$route.params.id, // Giả sử lấy ID sách từ route
-        coverImage: '/path/to/book-cover.jpg',
-        title: 'Book Title',
-        author: 'Author Name',
-        genre: 'Genre',
-        publishDate: '2023-10-01',
-        availability: 'Available',
-        description: 'This is a detailed summary of the book...'
-      },
-      similarBooks: [
-        // Dữ liệu giả cho các sách tương tự, có thể thay bằng API thực tế
-        { id: 1, coverImage: '/path/to/similar-book1.jpg', title: 'Similar Book 1', author: 'Author 1' },
-        { id: 2, coverImage: '/path/to/similar-book2.jpg', title: 'Similar Book 2', author: 'Author 2' },
-        { id: 3, coverImage: '/path/to/similar-book3.jpg', title: 'Similar Book 3', author: 'Author 3' },
-      ],
+      book: null,
+      showBorrowForm: false,
+      borrowerName: '',
     };
   },
-  methods: {
-    addToBorrowCart(book) {
-      // Thêm logic để đưa sách vào giỏ mượn (borrow cart)
-      console.log("Added to borrow cart:", book);
-    },
+  computed: {
+    formattedPublicationDate() {
+      if (this.book && this.book.publicationDate) {
+        return new Date(this.book.publicationDate).toLocaleDateString();
+      }
+      return 'Unknown';
+    }
   },
+ methods: {
+  async fetchBookDetails() {
+    console.log("fetchBookDetails method called");
+    try {
+      const response = await apiClient.get(`/books/${this.$route.params.id}`);
+      console.log("API response:", response);
+
+      // Gán dữ liệu sách từ phản hồi API
+      this.book = response.data;
+
+      // Kiểm tra lại dữ liệu sách sau khi nhận từ API
+      console.log("Fetched Book:", this.book);
+
+      // Xử lý cover image với đường dẫn đầy đủ
+      const baseURL = 'http://localhost:5000'; // Địa chỉ của server
+      if (this.book.images && this.book.images.length > 0) {
+        this.book.coverImage = `${baseURL}/${this.book.images[0].replace(/\\/g, '/')}`;
+      } else {
+        this.book.coverImage = ''; // Để tránh lỗi nếu không có hình ảnh nào
+      }
+
+      // Kiểm tra lại URL hình ảnh sau khi xử lý
+      console.log('Cover Image URL:', this.book.coverImage);
+    } catch (error) {
+      console.error('Failed to fetch book details:', error);
+    }
+  },
+},
+  mounted() {
+    console.log("Mounted BookDetail.vue");
+    debugger;
+    this.fetchBookDetails();
+  }
 };
 </script>
 
 <style scoped>
-.book-details-page {
+.book-detail-container {
   max-width: 800px;
-  margin: auto;
+  margin: 0 auto;
 }
 
-.similar-books-carousel {
+.book-detail-card {
   display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 10px;
+  gap: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.carousel-item {
-  flex: 0 0 auto;
-  text-align: center;
-  width: 150px;
-}
-
-.carousel-item img {
-  width: 100%;
+.book-cover-image {
+  width: 200px;
   height: auto;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.book-info {
+  flex-grow: 1;
+}
+
+.borrow-button-container {
+  margin-top: 20px;
+}
+
+.borrow-form {
+  margin-top: 40px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.borrow-form .form-group {
+  margin-bottom: 15px;
+}
+
+.borrow-form label {
+  font-weight: bold;
 }
 </style>

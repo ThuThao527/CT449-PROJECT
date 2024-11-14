@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const borrowRequestController = require('../controllers/borrowRequestController');
+const adminController = require('../controllers/borrowRequestController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
-const adminController = require('../controllers/adminController');
+const bookController = require('../controllers/bookController')
+const upload = require('../middleware/multerConfig')
 
-router.get('/admin/approve-loans', verifyToken, isAdmin, adminController.approveLoans);
-router.post('/admin/add-book', verifyToken, isAdmin, adminController.addBook);
-router.get('/admin/user-accounts', verifyToken, isAdmin, adminController.getUserAccounts);
 
-// Route chỉ dành cho admin để duyệt yêu cầu mượn sách
-router.get('/admin', verifyToken, isAdmin, (req, res) => {
-  res.json({ message: 'Trang này dành cho admin duyệt yêu cầu mượn sách' });
-});
+router.get('/approve-loans', verifyToken, isAdmin, adminController.approveBorrowRequest);
+router.post('/add-book',  upload.array('images', 5), bookController.addBook);
+///router.post('/admin/add-book', verifyToken, isAdmin, bookController.addBook);
+//router.get('/admin/user-accounts', verifyToken, isAdmin, adminController.getUserAccounts);
+// router.get('/', verifyToken, isAdmin, (req, res) => {
+//   res.json({ message: 'Trang này dành cho admin duyệt yêu cầu mượn sách' });
+// });
 
 module.exports = router;

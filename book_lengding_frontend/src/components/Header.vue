@@ -32,12 +32,15 @@
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
         
         <!-- Nếu chưa đăng nhập, chỉ hiển thị "Login" -->
-        <li v-if="!isLoggedIn">
+        <template v-if="!isLoggedIn">
+          <li>
           <router-link to="/login" class="dropdown-item">Login</router-link>
-        </li>
+          </li>
+        </template>
         
         <!-- Nếu đã đăng nhập, hiển thị các mục khác -->
         <template v-else>
+          <!-- <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin Dashboard</router-link></li> -->
           <li><router-link to="/account-settings" class="dropdown-item">Account Settings</router-link></li>
           <li><router-link to="/borrow-history" class="dropdown-item">Borrow History</router-link></li>
           <li><a class="dropdown-item" href="#" @click="logout">Logout</a></li>
@@ -55,31 +58,46 @@
 
 <script>
 import apiClient from '../axios.js';
+import eventBus  from '@/eventBus.js';
+import { jwtDecode } from 'jwt-decode';
 
 export default {
   name: "Header",
   data() {
     return {
-      email: '',
-      password: '',
-      errorMessage: null,
+      isLoggedIn: false, // Mặc định là chưa đăng nhập
+      isAdmin : false
     };
   },
-  methods: {
-    async login() {
-      try {
-        const response = await apiClient.post('http://localhost:5000/api/login', {
-          email: this.email,
-          password: this.password,
-        });
-        const token = response.data.token;
-        localStorage.setItem('token', token); // Lưu token vào localStorage khi đăng nhập thành công
-        this.$router.push('/'); // Điều hướng đến trang chủ sau khi đăng nhập
-      } catch (error) {
-        this.errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
-      }
+  mounted() {
+     // Lắng nghe sự kiện "loggedIn" để cập nhật trạng thái khi người dùng đăng nhập
+    eventBus.on('loggedIn', () => {
+      this.isLoggedIn = true;
+    });
+
+    // Nếu cần thiết, lắng nghe sự kiện "loggedOut" để cập nhật trạng thái khi người dùng đăng xuất
+    eventBus.on('loggedOut', () => {
+      this.isLoggedIn = false;
+    });
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.isLoggedIn = true;
+      const decodedToken = jwtDecode(token);
+      this.isAdmin = decodedToken.role === 'Admin';
     }
-  }
+  
+  },
+  methods: {
+    logout() {
+      // Xử lý đăng xuất
+      localStorage.removeItem('token');
+      this.isLoggedIn = false;
+      this.isAdmin = false;
+      // Phát sự kiện "loggedOut" để thông báo rằng người dùng đã đăng xuất
+      eventBus.emit('loggedOut');    
+    },
+  },
 };
 </script>
 

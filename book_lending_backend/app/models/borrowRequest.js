@@ -13,12 +13,38 @@ const BorrowRequestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'returned'],
     default: 'pending',
   },
   requestDate: {
     type: Date,
     default: Date.now,
+  },
+  approvalDate: {
+    type: Date,
+  },
+  dueDate: {
+    type: Date,
+    required: function () {
+      return this.status === 'approved';
+    },
+  },
+  returnDate: {
+    type: Date,
+  },
+  actualReturnDate: {
+    type: Date,
+  },
+  fine: {
+    type: Number,
+    default: 0,
+  },
+  adminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  notes: {
+    type: String,
   },
 });
 

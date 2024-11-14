@@ -5,17 +5,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  idStudent: {
-    type: String,
-    unique: true,
-    required: true,
-  },
   dayOfBirth: {
     type: String,
-    required: true,
+    required: false,
   },
   gender: {
-    type: Boolean,
+    type: String,
+    enum: ['Nam', 'Nữ'],
     required: true,
   },
   phoneNumber: {
@@ -32,17 +28,32 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isVerified: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
+    enum: ['Admin', 'Reader'], 
+    default: 'Reader', 
   },
+  token: {
+    type: String,
+    default: null, 
+  }
+}, { collection: 'users' });
+
+const User = mongoose.model('User', UserSchema);
+
+const ReaderSchema = new mongoose.Schema({
   favoriteBooks: [{ 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Book' 
+    ref: 'Book',
   }],
-  address: {
+  idStudent: {
     type: String,
+    unique: true,
     required: true,
   },
   resetPasswordToken: {
@@ -52,7 +63,25 @@ const UserSchema = new mongoose.Schema({
   resetPasswordExpires: {
     type: Date,
     default: null,
-  }
+  },
 });
 
-module.exports = mongoose.model('User', UserSchema);
+// Tạo model Reader kế thừa từ User
+const Reader = User.discriminator('Reader', ReaderSchema);
+
+const AdminSchema = new mongoose.Schema({
+  managedFloors: {
+    type: [Number], // Mảng các tầng mà admin quản lý
+    required: true,
+  },
+});
+
+// Tạo model Admin kế thừa từ User
+const Admin = User.discriminator('Admin', AdminSchema);
+
+
+module.exports = {
+  User,
+  Reader,
+  Admin,
+};

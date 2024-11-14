@@ -1,36 +1,60 @@
 const Book = require('../models/book');
-const multer = require('multer');
 const path = require('path');
+const upload = require('../middleware/multerConfig')
 const { BadRequestError, NotFoundError, InternalServerError } = require('../api-error');
 
 
 // Lấy danh sách tất cả các sách
 exports.getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find();
+    // Nhận các tham số lọc từ query string
+    const { genre, language, author, sortBy } = req.query;
+    let filter = {};
+
+    // Áp dụng bộ lọc nếu có
+    if (genre) {
+      filter.genre = genre;
+    }
+    if (language) {
+      filter.language = language;
+    }
+    if (author) {
+      filter.author = new RegExp(author, 'i'); // Không phân biệt chữ hoa chữ thường
+    }
+
+    let books = await Book.find(filter);
+
+    // Sắp xếp theo yêu cầu (nếu có)
+    if (sortBy) {
+      if (sortBy === 'popularity') {
+        books = books.sort((a, b) => b.totalCopies - a.totalCopies); // Giả sử sách phổ biến dựa vào tổng số lượng
+      } else if (sortBy === 'latest') {
+        books = books.sort((a, b) => b.publicationDate - a.publicationDate);
+      } else if (sortBy === 'rating') {
+        // Nếu có trường "rating", bạn có thể sắp xếp theo đó
+      }
+    }
+
     res.json(books);
-  } catch (err) {
-    next(new InternalServerError('Failed to fetch books!'));
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).send({ message: 'Error fetching books' });
   }
 };
 
-// Lấy thông tin của một sách theo ID
-exports.getBookById = async (req, res, next) => {
+exports.getBookById = async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id); // Tìm sách dựa trên ID
+    const book = await Book.findById(req.params.id);
     if (!book) {
-      throw new NotFoundError('Book not found'); // Ném lỗi nếu không tìm thấy sách
+      return res.status(404).send({ message: 'Book not found' });
     }
-    res.json(book); // Trả về thông tin sách nếu tìm thấy
-  } catch (err) {
-    if (err.name === 'CastError') {
-      // Kiểm tra lỗi CastError khi ID không hợp lệ
-      next(new BadRequestError('Invalid book ID'));
-    } else {
-      next(new InternalServerError('Failed to fetch book')); // Ném lỗi nếu có lỗi khác
-    }
+    res.json(book);
+  } catch (error) {
+    console.error('Error fetching book details:', error);
+    res.status(500).send({ message: 'Error fetching book details' });
   }
 };
+
 
 // Mượn sách
 exports.borrowBook = async (req, res) => {
@@ -71,77 +95,80 @@ exports.returnBook = async (req, res) => {
 };
 
 // Thêm sách mới
-exports.addBook = async (req, res) => {
-  const { title, author, genre, totalCopies, availableCopies, rating } = req.body;
+exports.addBook = async (req, res, next) => {
+  console.log('Received request to add book:', req.body);
+  const { title, author, genre, totalCopies, availableCopies, description, position } = req.body;
+
+  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`.replace(/\\/g, '/')) : []; // Lấy đường dẫn của các hình ảnh đã tải lên
+
+  // const images = req.files ? req.files.map(file => file.path) : []; // Lấy đường dẫn của các hình ảnh đã tải lên
+  console.log(req.files); // Kiểm tra file có được nhận từ phía client không
+  console.log(req.body);
+
   try {
     const newBook = new Book({
       title,
       author,
-      genre,
+      genre: JSON.parse(genre),
       totalCopies,
       availableCopies,
-      rating,
+      description,
+      position: JSON.parse(position),
+      images,
+      availability: 'Available',
     });
+
     await newBook.save();
     res.status(201).json(newBook);
   } catch (err) {
+    console.error("Lỗi khi thêm sách:", err);
     next(new BadRequestError('Invalid book data'));
   }
 };
 
-
-// Multer configuration for handling multiple images
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = 'uploads/';
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 1000000 }, // 1MB limit
-    fileFilter: (req, file, cb) => {
-        const filetypes = /jpeg|jpg|png/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb('Error: Images Only!');
-        }
-    }
-});
-
-// Export the multer upload to use in routes
-module.exports.upload = upload;
-
-// Upload multiple images for a book
-exports.uploadBookImages = async (req, res, next) => {
+// API để lấy danh sách sách với các bộ lọc
+exports.getBook = async (req, res) => {
   try {
-    const bookId = req.params.id;
-    const book = await Book.findById(bookId);
+    const { genre, language, author, sortBy } = req.query;
+    let filter = {};
 
-    if (!book) {
-      throw new NotFoundError('Book not found');
+    // Áp dụng bộ lọc thể loại
+    if (genre) {
+      filter.genre = genre;
     }
 
-    // Extract URLs of uploaded files
-    const imageUrls = req.files.map(file => `${req.protocol}://${req.get("host")}/uploads/${file.filename}`);
-    console.log(req.files);
-    // Add new images to the book's images field
-    book.images = [...book.images, ...imageUrls];
-    await book.save();
-    
-    res.status(200).json({ message: "Images uploaded successfully", images: book.images });
-  } catch (err) {
-    console.error("Error:", err); 
-    next(new InternalServerError("Failed to upload images for the book"));
+    // Áp dụng bộ lọc ngôn ngữ
+    if (language) {
+      filter.language = language;
+    }
 
+    // Áp dụng bộ lọc tác giả
+    if (author) {
+      filter.author = new RegExp(author, 'i'); // Không phân biệt hoa thường
+    }
+
+    let books = await Book.find(filter);
+
+    // Sắp xếp theo yêu cầu
+    if (sortBy) {
+      if (sortBy === 'popularity') {
+        books = books.sort((a, b) => b.totalCopies - a.totalCopies); // Giả sử sắp xếp theo tổng số lượng
+      } else if (sortBy === 'latest') {
+        books = books.sort((a, b) => b.publicationDate - a.publicationDate);
+      } else if (sortBy === 'rating') {
+        // Có thể thêm logic sắp xếp theo đánh giá nếu có trường rating
+      }
+    }
+
+    res.json(books);
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching books' });
   }
 };
+
+
+
+
+
+
 

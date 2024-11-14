@@ -10,18 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-;
-
-
-// Đảm bảo đường dẫn chính xác tới thư mục uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
-
 // Kết nối tới MongoDB sử dụng config.db.url
 mongoose.connect(config.db.url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    //useNewUrlParser: true,
+    //useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
@@ -35,8 +27,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/books', bookRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 //Middleware xử lý lỗi
 app.use((err, req, res, next) => {
