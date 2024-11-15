@@ -14,7 +14,6 @@ import AddBook from '@/views/admin/AddBook.vue';
 import UserAccounts from '@/views/admin/UserAccounts.vue';
 import AuthForm from '@/views/AuthForm.vue';
 
-import BookDetail from '@/components/BookDetail.vue';
 
 function isAuthenticated() {
   return !!localStorage.getItem('token'); // Kiểm tra token trong localStorage
@@ -23,7 +22,7 @@ function isAuthenticated() {
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
   { path: '/catalog', name: 'Catalog', component: CatalogPage },
-  { path: '/books/:id', name: 'BookDetail', component: BookDetail,},
+  { path: '/books/:id', name: 'BookDetail', component: BookDetails,},
   { path: '/borrow-cart', name: 'BorrowCart', component: BorrowCart, meta: { requiresAuth: true} },
   { path: '/profile', name: 'UserProfile', component: UserProfile, meta: { requiresAuth: true} },
   { path: '/checkout', name: 'Checkout', component: Checkout, meta: { requiresAuth: true} },

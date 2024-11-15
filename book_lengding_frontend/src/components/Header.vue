@@ -41,8 +41,8 @@
         <!-- Nếu đã đăng nhập, hiển thị các mục khác -->
         <template v-else>
           <!-- <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin Dashboard</router-link></li> -->
-          <li><router-link to="/account-settings" class="dropdown-item">Account Settings</router-link></li>
-          <li><router-link to="/borrow-history" class="dropdown-item">Borrow History</router-link></li>
+          <li><router-link to="/UserProfile" class="dropdown-item">Account Settings</router-link></li>
+          <li><router-link to="/UserProfile" class="dropdown-item">Borrow History</router-link></li>
           <li><a class="dropdown-item" href="#" @click="logout">Logout</a></li>
         </template>
         

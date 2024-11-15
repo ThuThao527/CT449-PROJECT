@@ -17,19 +17,18 @@ exports.verifyToken = (req, res, next) => {
   });
 };
 
-exports.isAdmin = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(403).json({ message: 'Không có token' });
-  }
-
+exports.isAdmin = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, 'your_jwt_secret');
-    if (decoded.role !== 'Admin') {
-      return res.status(403).json({ message: 'Chỉ có admin mới có quyền truy cập' });
+    const userId = req.userId; // Giả sử userId được lưu trong JWT token hoặc trong session
+    const user = await User.findById(userId);
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).send({ message: 'You are not authorized to perform this action' });
     }
-    next();
+
+    next(); // Nếu là admin, tiếp tục xử lý
   } catch (error) {
-    return res.status(401).json({ message: 'Token không hợp lệ' });
+    console.error('Error while checking admin:', error);
+    res.status(500).send({ message: 'Server error' });
   }
 };
