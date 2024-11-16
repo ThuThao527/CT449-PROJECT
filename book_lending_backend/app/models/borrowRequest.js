@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
 const BorrowRequestSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  idStudent: {
+    type: String, // Thay đổi thành String để lưu idStudent (mã số sinh viên)
     required: true,
   },
   bookId: {
@@ -49,8 +48,9 @@ const BorrowRequestSchema = new mongoose.Schema({
       return this.dueDate;
     }
   },
-  actualReturnDate: {
+  returnedDate: {
     type: Date,
+    default: null,
   },
   fine: {
     type: Number,

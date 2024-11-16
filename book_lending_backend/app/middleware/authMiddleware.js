@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const {Admin} = require('../models/user')
 const { UnauthorizedError, ForbiddenError } = require('../api-error');
 
 exports.verifyToken = (req, res, next) => {
@@ -20,7 +21,7 @@ exports.verifyToken = (req, res, next) => {
 exports.isAdmin = async (req, res, next) => {
   try {
     const userId = req.userId; // Giả sử userId được lưu trong JWT token hoặc trong session
-    const user = await User.findById(userId);
+    const user = await Admin.findById(userId);
 
     if (!user || user.role !== 'admin') {
       return res.status(403).send({ message: 'You are not authorized to perform this action' });

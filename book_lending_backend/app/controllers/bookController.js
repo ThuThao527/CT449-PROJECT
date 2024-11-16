@@ -1,5 +1,5 @@
 const Book = require('../models/book');
-const User = require("../models/user")
+const {User, Admin } = require("../models/user")
 const BorrowRequest = require('../models/borrowRequest')
 const path = require('path');
 const upload = require('../middleware/multerConfig')
@@ -133,7 +133,7 @@ exports.getBook = async (req, res) => {
 exports.createBorrowRequest = async (req, res) => {
   try {
     console.log("Incoming borrow request data:", req.body);
-    const { userId, bookId, notes } = req.body;
+    const { idStudent, bookId, notes } = req.body;
 
     // Kiểm tra xem sách có tồn tại không
     const book = await Book.findById(bookId);
@@ -147,7 +147,7 @@ exports.createBorrowRequest = async (req, res) => {
     console.log("Book is located at floor:", bookFloor);
 
     // Tìm admin quản lý tầng tương ứng
-    const admins = await User.find({ managedFloors: bookFloor, role: 'admin' });
+    const admins = await Admin.find({ managedFloors: bookFloor, role: 'Admin' });
     if (admins.length === 0) {
       console.error("No admin found managing the floor:", bookFloor);
       return res.status(404).send({ message: 'No admin found for the requested floor' });
@@ -156,7 +156,7 @@ exports.createBorrowRequest = async (req, res) => {
     // Chọn admin đầu tiên quản lý tầng này (có thể mở rộng logic sau này)
     const assignedAdmin = admins[0];
     console.log("Assigned admin ID:", assignedAdmin._id);
-    
+
     // Kiểm tra số lượng sách có đủ để mượn không
     if (book.availableCopies < 1) {
       console.log("No available copies of the book to borrow.");
@@ -165,10 +165,11 @@ exports.createBorrowRequest = async (req, res) => {
 
     // Tạo mới một BorrowRequest
     const borrowRequest = new BorrowRequest({
-      userId,
+      idStudent,
       bookId,
       notes,
       status: 'pending', // Mới tạo ra là đang chờ phê duyệt
+      adminId: assignedAdmin._id,
     });
 
     // Lưu yêu cầu mượn sách vào cơ sở dữ liệu
@@ -202,7 +203,7 @@ exports.updateBorrowRequestStatus = async (req, res) => {
     }
 
     // Kiểm tra quyền của admin
-    const admin = await User.findById(adminId);
+    const admin = await Admin.findById(adminId);
     if (!admin || admin.role !== 'admin') {
       console.error("Unauthorized action. Admin rights required.");
       return res.status(403).send({ message: 'Admin rights required' });
@@ -306,6 +307,132 @@ exports.returnBook = async (req, res) => {
     res.status(500).send({ message: 'An error occurred while processing your return.' });
   }
 };
+
+// Lấy danh sách tất cả các yêu cầu mượn sách (cho Admin)
+exports.getAllBorrowRequests = async (req, res) => {
+  try {
+    // Tìm tất cả các yêu cầu mượn sách và populate thông tin sách và người mượn
+    const borrowRequests = await BorrowRequest.find()
+      .populate('bookId') // Lấy thông tin chi tiết của sách
+      .populate('adminId'); // Lấy thông tin chi tiết của người mượn
+      console.log("Fetched borrow requests:", borrowRequests);
+    res.status(200).send(borrowRequests);
+  } catch (error) {
+    console.error("Error fetching borrow requests:", error.message, error.stack);
+    res.status(500).send({ message: 'An error occurred while fetching borrow requests.' });
+  }
+};
+
+// Phê duyệt yêu cầu mượn sách
+exports.approveBorrowRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Tìm yêu cầu mượn sách theo ID
+    const borrowRequest = await BorrowRequest.findById(id);
+    if (!borrowRequest) {
+      return res.status(404).send({ message: 'Borrow request not found' });
+    }
+
+    // Cập nhật trạng thái yêu cầu mượn sách thành 'approved'
+    borrowRequest.status = 'approved';
+    borrowRequest.approvalDate = new Date(); // Gán ngày phê duyệt hiện tại
+    borrowRequest.dueDate = new Date(borrowRequest.approvalDate); 
+    borrowRequest.dueDate.setDate(borrowRequest.approvalDate.getDate() + 14); // hết hạn sau 14 ngày
+    
+
+    await borrowRequest.save();
+
+    res.status(200).send({ message: 'Borrow request approved successfully' });
+  } catch (error) {
+    console.error("Error approving borrow request:", error);
+    res.status(500).send({ message: 'An error occurred while approving the borrow request.' });
+  }
+};
+
+// Từ chối yêu cầu mượn sách
+exports.rejectBorrowRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Tìm yêu cầu mượn sách theo ID
+    const borrowRequest = await BorrowRequest.findById(id);
+    if (!borrowRequest) {
+      return res.status(404).send({ message: 'Borrow request not found' });
+    }
+
+    // Cập nhật trạng thái yêu cầu mượn sách thành 'rejected'
+    borrowRequest.status = 'rejected';
+
+    await borrowRequest.save();
+
+    res.status(200).send({ message: 'Borrow request rejected successfully' });
+  } catch (error) {
+    console.error("Error rejecting borrow request:", error);
+    res.status(500).send({ message: 'An error occurred while rejecting the borrow request.' });
+  }
+};
+
+exports.getPendingBorrowRequests = async (req, res) => {
+  try {
+    const borrowRequests = await BorrowRequest.find({ status: 'pending' }).populate('bookId').populate('adminId');
+    res.status(200).send(borrowRequests);
+  } catch (error) {
+    res.status(500).send({ message: 'An error occurred while fetching pending borrow requests.' });
+  }
+};
+
+exports.getApprovedBorrowRequests = async (req, res) => {
+  try {
+    const borrowRequests = await BorrowRequest.find({ status: 'approved' }).populate('bookId').populate('adminId');
+    res.status(200).send(borrowRequests);
+  } catch (error) {
+    res.status(500).send({ message: 'An error occurred while fetching approved borrow requests.' });
+  }
+};
+
+exports.returnBook = async (req, res) => {
+  try {
+    const borrowRequestId = req.params.id;
+
+    // Tìm yêu cầu mượn sách
+    const borrowRequest = await BorrowRequest.findById(borrowRequestId);
+
+    if (!borrowRequest) {
+      return res.status(404).send({ message: 'Borrow request not found' });
+    }
+
+    if (borrowRequest.status !== 'approved') {
+      return res.status(400).send({ message: 'Only approved requests can be marked as returned' });
+    }
+
+    // Cập nhật trạng thái và ngày trả
+    borrowRequest.status = 'returned';
+    borrowRequest.returnedDate = new Date(); // Ghi nhận ngày trả
+
+    // Kiểm tra nếu trả muộn hơn `newDueDate`
+    if (borrowRequest.newDueDate && borrowRequest.returnedDate > borrowRequest.newDueDate) {
+      const daysLate = Math.floor((borrowRequest.returnedDate - borrowRequest.newDueDate) / (1000 * 60 * 60 * 24));
+      borrowRequest.fine = daysLate * 1; // Tiền phạt là 1 đơn vị tiền mỗi ngày trễ
+    } else {
+      borrowRequest.fine = 0; // Không có phạt nếu trả đúng hạn
+    }
+
+    await borrowRequest.save();
+
+    res.status(200).send({
+      message: 'Book returned successfully',
+      borrowRequest,
+    });
+  } catch (error) {
+    console.error('Error returning book:', error);
+    res.status(500).send({ message: 'An error occurred while returning the book' });
+  }
+};
+
+
+
+
 
 
 

@@ -16,10 +16,11 @@
       <!-- Navigation Links -->
       <nav class="nav-links d-none d-md-flex justify-content-center">
         <router-link to="/catalog" class="nav-link">Thể loại</router-link>
-        <router-link to="/book" class="nav-link">Sách</router-link>
+        <!-- <router-link to="/book" class="nav-link">Sách</router-link> -->
         <router-link to="/borrow-cart" class="nav-link">Tủ sách</router-link>
+        <router-link to="/policy" class="nav-link">Chính sách mượn</router-link>
         <router-link to="/profile" class="nav-link">Tài khoản</router-link>
-        <router-link to="/checkout" class="nav-link">Phiếu mượn</router-link>
+        <!-- <router-link to="/checkout" class="nav-link">Phiếu mượn</router-link> -->
 
       </nav>
 
@@ -118,15 +119,17 @@ export default {
 }
 
 .nav-links a {
-  margin: 0 0.5rem; /* Tạo khoảng cách giữa các link */
+  margin: 0 0.5rem;
   color: #333;
   padding: 0.5rem 1rem;
   text-decoration: none;
   white-space: nowrap;
+  border-radius: 4px; /* Bo tròn nhẹ */
 }
 
 .nav-links a:hover {
-  color: #58a0ec;
+  color: #fff;
+  background-color: #007bff; /* Màu nền khi hover */
 }
 
 .user-cart {

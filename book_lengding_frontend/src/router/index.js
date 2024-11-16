@@ -7,13 +7,12 @@ import BookDetails from '@/views/BookDetails.vue';
 import BorrowCart from '@/views/BorrowCart.vue';
 import UserProfile from '@/views/UserProfile.vue';
 import Checkout from '@/views/Checkout.vue';
-
 import AdminDashboard from '@/views/admin/AdminDashboard.vue';
 import ApproveLoans from '@/views/admin/ApproveLoans.vue';
 import AddBook from '@/views/admin/AddBook.vue';
 import UserAccounts from '@/views/admin/UserAccounts.vue';
 import AuthForm from '@/views/AuthForm.vue';
-
+import Policy from '@/views/Policy.vue';
 
 function isAuthenticated() {
   return !!localStorage.getItem('token'); // Kiểm tra token trong localStorage
@@ -30,7 +29,7 @@ const routes = [
   { path: '/admin/add-book', component: AddBook, name: 'AddBook', meta: { requiresAuth: true } },
   { path: '/admin/user-accounts', component: UserAccounts, name: 'UserAccounts', meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin', component: AdminDashboard, name: 'AdminDashboard', meta: { requiresAuth: true, requiresAdmin: true }},
-
+  { path: '/policy', name: 'Policy',component: Policy, name : 'Policy'},
   { path: '/login', component: AuthForm, name: 'Login' },
   { path: '/register', component: AuthForm, name : ' register' },
   { path: '/verify-otp', component: AuthForm, name : ' verify'}

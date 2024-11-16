@@ -109,11 +109,11 @@ export default {
     try {
       const requestData = {
         bookId: this.book._id,
-        userId: this.idStudent,  // Chú ý sửa chính tả từ 'idStusent' thành 'userId'
+        idStudent: this.idStudent, 
         borrowDate: this.borrowDate,
         note: this.note,
       };
-      const response = await apiClient.post('/borrow', requestData);
+      const response = await apiClient.post('/books/createBorrowRequest', requestData);
       if (response.status === 200) {
         alert('Borrow request submitted successfully!');
         this.showBorrowForm = false;
