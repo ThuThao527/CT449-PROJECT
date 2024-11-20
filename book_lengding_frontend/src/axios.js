@@ -6,15 +6,9 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Đảm bảo cookie (session) được gửi kèm trong mọi yêu cầu
 });
 
-// Thêm interceptor để tự động thêm token vào header của mọi yêu cầu
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
-  }
-  return config;
-});
+
 
 export default apiClient;

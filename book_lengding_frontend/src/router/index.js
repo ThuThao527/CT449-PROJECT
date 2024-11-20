@@ -1,6 +1,6 @@
-// src/router/index.js
+import axios from 'axios';
+import apiClient from '@/axios'; 
 import { createRouter, createWebHistory } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
 import HomePage from '@/views/Homepage.vue';
 import CatalogPage from '@/views/Catalogpage.vue';
 import BookDetails from '@/views/BookDetails.vue';
@@ -14,25 +14,22 @@ import UserAccounts from '@/views/admin/UserAccounts.vue';
 import AuthForm from '@/views/AuthForm.vue';
 import Policy from '@/views/Policy.vue';
 
-function isAuthenticated() {
-  return !!localStorage.getItem('token'); // Kiểm tra token trong localStorage
-}
-
 const routes = [
-  { path: '/', name: 'Home', component: HomePage },
-  { path: '/catalog', name: 'Catalog', component: CatalogPage },
-  { path: '/books/:id', name: 'BookDetail', component: BookDetails,},
-  { path: '/borrow-cart', name: 'BorrowCart', component: BorrowCart, meta: { requiresAuth: true} },
-  { path: '/profile', name: 'UserProfile', component: UserProfile, meta: { requiresAuth: true} },
-  { path: '/checkout', name: 'Checkout', component: Checkout, meta: { requiresAuth: true} },
-  { path: '/admin/approve-loans', component: ApproveLoans, name: 'ApproveLoans', meta: { requiresAuth: true, requiresAdmin: true }},
-  { path: '/admin/add-book', component: AddBook, name: 'AddBook', meta: { requiresAuth: true } },
+  { path: '/', redirect: '/homepage' },
+  { path: '/homepage', name: 'Home', component: HomePage },
+  { path: '/catalog', name: 'Catalog', component: CatalogPage  },
+  { path: '/books/:id', name: 'BookDetail', component: BookDetails, meta: { requiresAuth: true } },
+  { path: '/borrow-cart', name: 'BorrowCart', component: BorrowCart, meta: { requiresAuth: true } },
+  { path: '/profile', name: 'UserProfile', component: UserProfile, meta: { requiresAuth: true } },
+  { path: '/checkout', name: 'Checkout', component: Checkout, meta: { requiresAuth: true } },
+  { path: '/admin/approve-loans', component: ApproveLoans, name: 'ApproveLoans', meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/admin/add-book', component: AddBook, name: 'AddBook', meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin/user-accounts', component: UserAccounts, name: 'UserAccounts', meta: { requiresAuth: true, requiresAdmin: true } },
-  { path: '/admin', component: AdminDashboard, name: 'AdminDashboard', meta: { requiresAuth: true, requiresAdmin: true }},
-  { path: '/policy', name: 'Policy',component: Policy, name : 'Policy'},
+  { path: '/admin', component: AdminDashboard, name: 'AdminDashboard', meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/policy', name: 'Policy', component: Policy },
   { path: '/login', component: AuthForm, name: 'Login' },
-  { path: '/register', component: AuthForm, name : ' register' },
-  { path: '/verify-otp', component: AuthForm, name : ' verify'}
+  { path: '/register', component: AuthForm, name: 'Register' },
+  { path: '/verify-otp', component: AuthForm, name: 'Verify' }
 ];
 
 const router = createRouter({
@@ -41,26 +38,37 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
-  
+  // Kiểm tra xem người dùng có phiên làm việc hay không (dựa vào cookie session)
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!token) {
-      // Nếu route cần xác thực và không có token, điều hướng đến login
-      return next('/login');
-    } else {
-      // Nếu có token, giải mã token để kiểm tra role
-      const decodedToken = jwtDecode(token);
-      const userRole = decodedToken.role;
+    // Nếu route yêu cầu xác thực và không có session, điều hướng đến login
+    apiClient.get('/user/check-session')
+      .then(response => {
+        const userRole = response.data.role;
 
-      if (to.matched.some(record => record.meta.requiresAdmin) && userRole !== 'Admin') {
-        // Nếu route yêu cầu quyền admin và người dùng không phải admin, điều hướng về trang chủ
-        return next('/homepage');
-      }
-    }
+        // Nếu route yêu cầu quyền admin và người dùng không phải admin, chuyển đến homepage
+        if (to.matched.some(record => record.meta.requiresAdmin)) {
+          if (userRole !== 'Admin') {
+            return next('/homepage');
+          } else {
+            // Nếu người dùng là admin, cho phép tiếp tục
+            return next();
+          }
+        }
+
+        // Nếu người dùng là admin và đăng nhập thành công, điều hướng đến trang admin
+        if (userRole === 'Admin' && to.path === '/admin') {
+          return next();
+        } else if (userRole === 'Admin' && to.path !== '/admin') {
+          return next('/admin');
+        }
+
+        // Nếu người dùng là người thường, cho phép tiếp tục đến các trang khác
+        next();
+      })
+      .catch(() => next('/login'));
+  } else {
+    next(); // Nếu route không yêu cầu xác thực, cho phép tiếp tục
   }
-
-  next(); // Nếu không cần xác thực hoặc đã xác thực thành công, cho phép tiếp tục
 });
-
 
 export default router;

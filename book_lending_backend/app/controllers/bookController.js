@@ -64,7 +64,7 @@ exports.addBook = async (req, res, next) => {
 
   const images = req.files ? req.files.map(file => `/uploads/${file.filename}`.replace(/\\/g, '/')) : []; // Lấy đường dẫn của các hình ảnh đã tải lên
 
-  // const images = req.files ? req.files.map(file => file.path) : []; // Lấy đường dẫn của các hình ảnh đã tải lên
+  // const images = req.files ? req.files.map(file => file.path) : []; 
   console.log(req.files); // Kiểm tra file có được nhận từ phía client không
   console.log(req.body);
 
@@ -429,6 +429,24 @@ exports.returnBook = async (req, res) => {
     res.status(500).send({ message: 'An error occurred while returning the book' });
   }
 };
+
+
+exports.getBooksBySearch = async (req, res) => {
+  const { query } = req.query; // Nhận từ khóa tìm kiếm từ query string
+  try {
+    const books = await Book.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { author: { $regex: query, $options: 'i' } },
+        { genre: { $regex: query, $options: 'i' } },
+      ],
+    });
+    res.status(200).json(books);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching books' });
+  }
+};
+
 
 
 

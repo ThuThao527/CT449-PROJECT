@@ -10,16 +10,23 @@
       
       <!-- Search Bar -->
       <div class="col-md-4 search-bar">
-        <input type="text" class="form-control" placeholder="Search books, authors, genres..." />
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search books, authors, genres..."
+          v-model="searchQuery"
+          @keyup.enter="searchBooks"
+        />
       </div>
+
       
       <!-- Navigation Links -->
       <nav class="nav-links d-none d-md-flex justify-content-center">
-        <router-link to="/catalog" class="nav-link">Thể loại</router-link>
+        <router-link to="/catalog" class="nav-link">Catalog</router-link>
         <!-- <router-link to="/book" class="nav-link">Sách</router-link> -->
-        <router-link to="/borrow-cart" class="nav-link">Tủ sách</router-link>
-        <router-link to="/policy" class="nav-link">Chính sách mượn</router-link>
-        <router-link to="/profile" class="nav-link">Tài khoản</router-link>
+        <router-link to="/borrow-cart" class="nav-link">Favorite</router-link>
+        <router-link to="/policy" class="nav-link">Borrow Policy</router-link>
+        <router-link to="/profile" class="nav-link">Account</router-link>
         <!-- <router-link to="/checkout" class="nav-link">Phiếu mượn</router-link> -->
 
       </nav>
@@ -42,8 +49,8 @@
         <!-- Nếu đã đăng nhập, hiển thị các mục khác -->
         <template v-else>
           <!-- <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin Dashboard</router-link></li> -->
-          <li><router-link to="/UserProfile" class="dropdown-item">Account Settings</router-link></li>
-          <li><router-link to="/UserProfile" class="dropdown-item">Borrow History</router-link></li>
+          <li><router-link to="/profile" class="dropdown-item">Account Settings</router-link></li>
+          <!-- <li><router-link to="/UserProfile" class="dropdown-item">Borrow History</router-link></li> -->
           <li><a class="dropdown-item" href="#" @click="logout">Logout</a></li>
         </template>
         
@@ -67,9 +74,22 @@ export default {
   data() {
     return {
       isLoggedIn: false, // Mặc định là chưa đăng nhập
-      isAdmin : false
+      isAdmin : false,
+      searchQuery: '',
     };
   },
+   async searchBooks(searchQuery) {
+  try {
+    console.log('Search books with query:', searchQuery);
+    const response = await apiClient.get('/books/getBooksBySearch', {
+      params: { query: searchQuery },
+    });
+    console.log('Books found:', response.data);
+    this.books = response.data;
+  } catch (error) {
+    console.error('Failed to fetch books by search:', error);
+  }
+},
   mounted() {
      // Lắng nghe sự kiện "loggedIn" để cập nhật trạng thái khi người dùng đăng nhập
     eventBus.on('loggedIn', () => {
@@ -80,26 +100,28 @@ export default {
     eventBus.on('loggedOut', () => {
       this.isLoggedIn = false;
     });
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.isLoggedIn = true;
-      const decodedToken = jwtDecode(token);
-      this.isAdmin = decodedToken.role === 'Admin';
-    }
   
   },
   methods: {
-    logout() {
-      // Xử lý đăng xuất
-      localStorage.removeItem('token');
+  async logout() {
+    try {
+      // Gọi API để logout
+      await apiClient.post('/user/logout', {}, { withCredentials: true });
       this.isLoggedIn = false;
       this.isAdmin = false;
       // Phát sự kiện "loggedOut" để thông báo rằng người dùng đã đăng xuất
       eventBus.emit('loggedOut');    
-    },
+      // Điều hướng người dùng về trang login hoặc trang chủ
+      this.$router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      alert('Logout failed. Please try again.');
+    }
   },
+},
 };
+
+
 </script>
 
 <style scoped>

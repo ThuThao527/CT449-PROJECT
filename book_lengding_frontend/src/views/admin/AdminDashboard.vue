@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="jumbotron text-center bg-primary text-white py-4 rounded">
       <h1 class="display-4">Admin Dashboard</h1>
-      <p class="lead">Quản lý yêu cầu mượn sách, thêm sách mới, và quản lý tài khoản người dùng</p>
+      <p class="lead">Manage book borrowing requests, add new books, and manage user accounts</p>
     </div>
 
     <!-- Navigation Cards -->
@@ -12,11 +12,11 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100 text-center shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Duyệt Yêu Cầu Mượn Sách</h5>
+            <h5 class="card-title">Approve Book Borrowing Requests</h5>
             <p class="card-text">
-              Xem và duyệt các yêu cầu mượn sách từ người dùng.
+              View and approve book borrowing requests from users.
             </p>
-            <router-link to="/admin/approve-loans" class="btn btn-primary">Duyệt Yêu Cầu</router-link>
+            <router-link to="/admin/approve-loans" class="btn btn-primary">View requests</router-link>
           </div>
         </div>
       </div>
@@ -25,11 +25,11 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100 text-center shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Thêm Sách Mới</h5>
+            <h5 class="card-title">Manage books</h5>
             <p class="card-text">
-              Thêm các cuốn sách mới vào hệ thống thư viện.
+              Add new books to the library system or delete book.
             </p>
-            <router-link to="/admin/add-book" class="btn btn-success">Thêm Sách</router-link>
+            <router-link to="/admin/add-book" class="btn btn-success">View books</router-link>
           </div>
         </div>
       </div>
@@ -38,11 +38,11 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100 text-center shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Xem Danh Sách Tài Khoản</h5>
+            <h5 class="card-title">View User Account List</h5>
             <p class="card-text">
-              Quản lý các tài khoản người dùng trong hệ thống.
+              Manage user accounts in the system.
             </p>
-            <router-link to="/admin/user-accounts" class="btn btn-info">Xem Tài Khoản</router-link>
+            <router-link to="/admin/user-accounts" class="btn btn-info">View accounts</router-link>
           </div>
         </div>
       </div>

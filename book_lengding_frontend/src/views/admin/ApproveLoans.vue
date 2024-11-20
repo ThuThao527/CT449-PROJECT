@@ -96,7 +96,7 @@ export default {
   methods: {
     async fetchPendingRequests() {
       try {
-        const response = await apiClient.get('/books/borrowRequests/pending');
+        const response = await apiClient.get('/books/borrowRequests/pending', {withCredentials: true});
         this.pendingRequests = response.data;
       } catch (error) {
         console.error('Failed to fetch pending borrow requests:', error);
@@ -104,7 +104,7 @@ export default {
     },
     async fetchApprovedRequests() {
       try {
-        const response = await apiClient.get('/books/borrowRequests/approved');
+        const response = await apiClient.get('/books/borrowRequests/approved',{withCredentials: true} );
         this.approvedRequests = response.data;
       } catch (error) {
         console.error('Failed to fetch approved borrow requests:', error);
@@ -112,7 +112,7 @@ export default {
     },
     async approveRequest(requestId) {
       try {
-        await apiClient.post(`/books/borrowRequests/approve/${requestId}`);
+        await apiClient.post(`/books/borrowRequests/approve/${requestId}`, {withCredentials: true});
         alert('Request approved successfully');
         this.fetchPendingRequests();
         this.fetchApprovedRequests();
@@ -123,7 +123,7 @@ export default {
     },
     async rejectRequest(requestId) {
       try {
-        await apiClient.post(`/books/borrowRequests/reject/${requestId}`);
+        await apiClient.post(`/books/borrowRequests/reject/${requestId}`,{withCredentials: true});
         alert('Request rejected successfully');
         this.fetchPendingRequests();
       } catch (error) {
@@ -133,7 +133,7 @@ export default {
     },
       async returnBook(requestId) {
       try {
-          const response = await apiClient.post(`/books/borrowRequests/return/${requestId}`);
+          const response = await apiClient.post(`/books/borrowRequests/return/${requestId}`,{withCredentials: true});
           alert('Book returned successfully');
           this.fetchApprovedRequests(); // Làm mới danh sách yêu cầu đã phê duyệt
         } catch (error) {

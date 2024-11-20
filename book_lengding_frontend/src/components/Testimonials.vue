@@ -25,12 +25,12 @@ export default {
   data() {
     return {
       testimonials: [
-        { id: 1, name: 'John Doe', role: 'Book Lover', comment: 'This website has an amazing collection of books!', avatar: '/avatar1.jpg' },
-        { id: 2, name: 'Jane Smith', role: 'Avid Reader', comment: 'I found all my favorite books here. The process was smooth!', avatar: '/avatar2.jpg' },
-        { id: 3, name: 'Samuel Lee', role: 'Student', comment: 'Perfect place to borrow books for my studies!', avatar: '/avatar3.jpg' },
-        { id: 4, name: 'Emily Johnson', role: 'Writer', comment: 'A wonderful platform for readers and writers alike!', avatar: '/avatar4.jpg' },
-        { id: 5, name: 'Michael Brown', role: 'Researcher', comment: 'The best place to find rare books and references!', avatar: '/avatar5.jpg' },
-        { id: 6, name: 'Sarah Wilson', role: 'Historian', comment: 'A delightful experience for anyone who loves books!', avatar: '/avatar6.jpg' },
+        { id: 1, name: 'Thu Thao', role: 'Student', comment: 'This website has an amazing collection of books!', avatar: '/image/reader1.jpg' },
+        { id: 2, name: 'Jane Smith', role: 'Student', comment: 'I found all my favorite books here. The process was smooth!', avatar: '/image/reader2.jpg' },
+        { id: 3, name: 'Samuel Lee', role: 'Student', comment: 'Perfect place to borrow books for my studies!', avatar: '/image/reader3.jpg' },
+        { id: 4, name: 'Emily Johnson', role: 'Student', comment: 'A wonderful platform for readers and writers alike!', avatar: '/image/reader4.jpg' },
+        { id: 5, name: 'Michael Brown', role: 'Student', comment: 'The best place to find rare books and references!', avatar: '/image/reader4.jpg' },
+        { id: 6, name: 'Sarah Wilson', role: 'Student', comment: 'A delightful experience for anyone who loves books!', avatar: '/image/reader4.jpg' },
       ],
       currentChunkIndex: 0,
       chunkSize: 3,

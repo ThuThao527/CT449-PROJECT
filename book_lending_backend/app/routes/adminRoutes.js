@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/borrowRequestController');
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const { requireLogin, isAdmin } = require('../middleware/authMiddleware');
 const bookController = require('../controllers/bookController')
 const upload = require('../middleware/multerConfig')
 
 
-router.get('/approve-loans', verifyToken, isAdmin, adminController.approveBorrowRequest);
+router.get('/approve-loans', requireLogin, isAdmin, adminController.approveBorrowRequest);
 router.post('/add-book',  upload.array('images', 5), bookController.addBook);
 ///router.post('/admin/add-book', verifyToken, isAdmin, bookController.addBook);
 //router.get('/admin/user-accounts', verifyToken, isAdmin, adminController.getUserAccounts);

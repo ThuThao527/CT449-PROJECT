@@ -2,28 +2,36 @@ const jwt = require('jsonwebtoken');
 const {Admin} = require('../models/user')
 const { UnauthorizedError, ForbiddenError } = require('../api-error');
 
-exports.verifyToken = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return next(new ForbiddenError('No token provided'));
+exports.requireLogin = async (req, res, next) => {
+   if (!req.session.userId) {
+    return res.status(401).json({ message: 'Unauthorized, please log in' });
   }
+  next();
+};
 
-  jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
-    if (err) {
-      return next(new UnauthorizedError('Unauthorized'));
-    }
-    req.userId = decoded.userId;
-    req.isAdmin = decoded.isAdmin;
+exports.checkAuth = async (req, res, next) => {
+  if (req.session && req.session.userId) {
     next();
-  });
+  } else {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 };
 
 exports.isAdmin = async (req, res, next) => {
   try {
-    const userId = req.userId; // Giả sử userId được lưu trong JWT token hoặc trong session
+    // Lấy userId từ session
+    const userId = req.session.userId; 
+
+    // Kiểm tra xem userId có tồn tại không
+    if (!userId) {
+      return res.status(401).send({ message: 'Unauthorized access' });
+    }
+
+    // Tìm người dùng trong Admin collection để xác nhận vai trò admin
     const user = await Admin.findById(userId);
 
-    if (!user || user.role !== 'admin') {
+    // Kiểm tra xem người dùng có tồn tại và có role là 'Admin' hay không
+    if (!user || user.role !== 'Admin') {
       return res.status(403).send({ message: 'You are not authorized to perform this action' });
     }
 

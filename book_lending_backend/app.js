@@ -5,9 +5,21 @@ const config = require('./app/config/index'); // Import config từ file config/
 const {ApiError} = require('./app/api-error');
 const path = require('path')
 const app = express();
+require('dotenv').config();
+const session = require('express-session');
+
+app.use(session({
+  secret: 'your-secret-key',  // Đây là khóa bí mật để mã hóa session
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }  // Đặt thành true nếu bạn dùng HTTPS
+}));
 
 // Sử dụng các middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3001', // URL của frontend
+  credentials: true, // Cho phép cookie được gửi kèm
+}));
 app.use(express.json());
 
 // Kết nối tới MongoDB sử dụng config.db.url

@@ -1,12 +1,12 @@
 <template>
   <div class="policy-container">
-    <h2>Chính sách mượn sách của thư viện</h2>
-    <ul>
-      <li>Thời gian mượn tối đa: 14 ngày.</li>
-      <li>Số lượng sách tối đa: 5 quyển mỗi lần.</li>
-      <li>Phí phạt: 1.000 VNĐ/ngày nếu trả trễ.</li>
-      <li>Gia hạn: Có thể gia hạn thêm 7 ngày nếu không có người mượn tiếp.</li>
-    </ul>
+   <h2>Library Book Borrowing Policy</h2> 
+   <ul> 
+    <li>Maximum borrowing time: 14 days.</li> 
+    <li>Maximum number of books: 5 books at a time.</li> 
+    <li>Penalty fee: 1,000 VND/day if returned late.</li> 
+    <li>Extension: Can be extended for an additional 7 days if there are no further borrowers.</li> 
+  </ul>
   </div>
 </template>
 

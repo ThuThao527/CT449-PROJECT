@@ -38,10 +38,7 @@ const UserSchema = new mongoose.Schema({
     enum: ['Admin', 'Reader'], 
     default: 'Reader', 
   },
-  token: {
-    type: String,
-    default: null, 
-  }
+  
 }, { collection: 'users' });
 
 const User = mongoose.model('User', UserSchema);

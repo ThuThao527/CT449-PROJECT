@@ -75,6 +75,16 @@ export default {
       sortBy: 'popularity'
     };
   },
+  watch: {
+  '$route'(to, from) {
+    console.log('Route changed:', to.query);
+    if (to.query.search) {
+      this.searchBooks(to.query.search);
+    } else {
+      this.fetchBooks();
+    }
+  },
+},
   methods: {
     // Phương thức để lấy toàn bộ sách mà không áp dụng bộ lọc
     async fetchBooks() {
@@ -87,7 +97,7 @@ export default {
         if (this.authorSearch) params.author = this.authorSearch;
         if (this.sortBy) params.sortBy = this.sortBy;
 
-        const response = await apiClient.get('/books/getAll', { params });
+        const response = await apiClient.get('/books/getAll', { params});
         console.log(response.data);
         const books = response.data.map(book => {
           // Xử lý đường dẫn ảnh để thành đường dẫn đầy đủ
@@ -110,6 +120,19 @@ export default {
       } catch (error) {
         console.error('Failed to fetch books:', error);
       }
+    },
+      async searchBooks(searchQuery) {
+      try {
+        const response = await apiClient.get('/books/getBooksBySearch', {
+          params: { query: searchQuery },
+        });
+        this.books = response.data;
+      } catch (error) {
+        console.error('Failed to fetch books by search:', error);
+      }
+    },
+    goToBookDetail(bookId) {
+      this.$router.push({ name: 'BookDetail', params: { id: bookId } });
     },
     // Lấy danh sách thể loại từ server
     async fetchGenres() {
@@ -135,10 +158,14 @@ export default {
   },
   },
   mounted() {
-    // Khi trang catalog được tải, lấy toàn bộ sách và thể loại, ngôn ngữ để hiển thị ngay lập tức
-    this.fetchBooks();     // Lấy toàn bộ sách không qua bộ lọc
-    this.fetchGenres();    // Lấy danh sách thể loại
-    this.fetchLanguages(); // Lấy danh sách ngôn ngữ
+    console.log("Mounted CatalogPage");
+    if (this.$route.query.search) {
+      this.searchBooks(this.$route.query.search);
+    } else {
+      this.fetchBooks();
+    }
+    this.fetchGenres();
+    this.fetchLanguages();
     console.log(this.books);
   }
 };

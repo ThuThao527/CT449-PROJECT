@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const {User, Admin, Reader} = require('../models/user');
 const Book = require('../models/book');
 
 const { NotFoundError, BadRequestError, InternalServerError, ConflictError } = require('../api-error');
@@ -7,16 +7,45 @@ const { NotFoundError, BadRequestError, InternalServerError, ConflictError } = r
 
 exports.getUserProfile = async (req, res) => {
   try {
-    // Lấy thông tin người dùng từ `req.userId` đã được xác thực
-    const user = await User.findById(req.userId).select('-password'); // Bỏ mật khẩu khỏi kết quả trả về
-    if (!user) {
-       throw new NotFoundError('User not found');
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
-    res.json(user);
+
+    // Thử tìm user từ Admin hoặc Reader
+    let user = await Admin.findById(req.session.userId).select('userFullName email gender phoneNumber dayOfBirth ');
+    if (!user) {
+      user = await Reader.findById(req.session.userId).select('userFullName email gender phoneNumber dayOfBirth ');
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user);
   } catch (error) {
-    throw new InternalServerError ('Error with get id user');
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.session.userId; // Lấy userId từ session
+    const updatedData = req.body;
+
+    const user = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).send('Error updating user information');
+  }
+};
+
+
+
 
 // Thêm sách vào danh sách yêu thích
 exports.addFavoriteBook = async (req, res, next) => {

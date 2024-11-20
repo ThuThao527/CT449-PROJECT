@@ -1,5 +1,4 @@
 // authController.js
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const { User, Reader, Admin } = require('../models/user');
@@ -83,15 +82,11 @@ exports.register = async (req, res, next) => {
       message: 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.'
     });
       
-   
   } catch (error) {
     console.error("Lỗi khi đăng ký:", error);
     next(new InternalServerError('Đăng ký thất bại'));
   }
 };
-
-
-
 
 // API Xác thực OTP
 exports.verifyOtp = async (req, res, next) => {
@@ -128,28 +123,56 @@ exports.verifyOtp = async (req, res, next) => {
     // Xóa người dùng tạm thời khỏi MongoDB
     await TempUser.deleteOne({ email });
 
-      try {
-        await newUser.save();
-        console.log("Người dùng đã được lưu thành công vào MongoDB.");
+    // Trả về thông báo xác thực thành công
+    res.status(200).json({ success: true, message: 'Xác thực OTP thành công. Tài khoản của bạn đã được kích hoạt.' });
 
-        res.status(200).json({ success: true, message: 'Xác thực OTP thành công. Tài khoản của bạn đã được kích hoạt.' });
-      } catch (saveError) {
-        console.error("Lỗi khi lưu người dùng vào MongoDB:", saveError);
-        return next(new InternalServerError('Không thể lưu thông tin người dùng. Vui lòng thử lại.'));
-      }
   } catch (error) {
     console.error("Lỗi khi xác thực OTP:", error);
     next(new InternalServerError('Xác thực OTP thất bại'));
   }
 };
 
+// API kiểm tra session
+exports.checkSession = async (req, res) => {
+  try {
+    if (req.session && req.session.userId) {
+      // Tìm kiếm người dùng với userId từ session
+      const user = await User.findById(req.session.userId);
+      if (user) {
+        return res.status(200).json({ 
+          loggedIn: true, 
+          userId: req.session.userId, 
+          role: user.role 
+        });
+      } else {
+        return res.status(404).json({ 
+          loggedIn: false, 
+          message: 'User not found' 
+        });
+      }
+    } else {
+      return res.status(401).json({ 
+        loggedIn: false, 
+        message: 'Unauthorized' 
+      });
+    }
+  } catch (error) {
+    console.error('Error during session check:', error);
+    return res.status(500).json({ 
+      loggedIn: false, 
+      message: 'Internal server error' 
+    });
+  }
+};
 
+
+// API Đăng nhập
 exports.login = async (req, res, next) => {
   console.log(req.body);
   const { email, password } = req.body;
 
   try {
-    // Tìm người dùng trong mô hình User thay vì Reader để bao gồm cả admin và reader
+    // Tìm người dùng trong mô hình User để bao gồm cả admin và reader
     const user = await User.findOne({ email });
     if (!user) {
       console.error('Không tìm thấy người dùng với email:', email);
@@ -168,22 +191,37 @@ exports.login = async (req, res, next) => {
       return next(new BadRequestError('Mật khẩu không chính xác'));
     }
 
-    // Tạo token JWT
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      'your_jwt_secret', // Thay bằng chuỗi bí mật
-      { expiresIn: '5h' }
-    );
-
-    user.token = token;
-    await user.save();
-
     console.log('Đăng nhập thành công cho email:', email);
-    res.json({ token });
+
+    // Lưu thông tin người dùng vào session
+    req.session.userId = user._id;
+    console.log('Session sau khi đăng nhập:', req.session);
+    console.log('Role:', user.role);
+
+    // Trả về thông tin người dùng
+    res.status(200).json({
+      message: 'Đăng nhập thành công',
+      user: {
+        _id: user._id,
+        email: user.email,
+        userFullName: user.userFullName,
+      },
+    });
     
   } catch (error) {
     console.error("Lỗi khi đăng nhập:", error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
+};
+
+
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid'); // Xóa cookie session
+    return res.status(200).json({ message: 'Logout successful' });
+  });
 };
 

@@ -61,3 +61,52 @@ exports.rejectBorrowRequest = async (req, res, next) => {
     next(err); // Truyền lỗi tới middleware xử lý lỗi
   }
 };
+
+exports.getBooksByStudent = async (req, res) => {
+  const { idStudent } = req.query; // Lấy mã số sinh viên từ query
+  if (!idStudent) {
+    return res.status(400).json({ message: 'idStudent is required' });
+  }
+
+  try {
+    // Lấy danh sách sách đang mượn (status = 'approved')
+    const currentlyBorrowed = await BorrowRequest.find({ 
+      idStudent, 
+      status: 'approved' 
+    }).populate('bookId', 'title author').select('approvalDate dueDate');
+
+    // Lấy danh sách lịch sử mượn (status = 'returned')
+    const borrowHistory = await BorrowRequest.find({ 
+      idStudent, 
+      status: 'returned' 
+    }).populate('bookId', 'title author').select('approvalDate returnedDate');
+
+    res.status(200).json({ currentlyBorrowed, borrowHistory });
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ message: 'Error fetching books' });
+  }
+};
+
+exports.renewBook = async (req, res) => {
+  const { bookId } = req.params;
+  const { newDueDate } = req.body;
+
+  try {
+    // Tìm BorrowRequest bằng bookId và cập nhật ngày gia hạn mới
+    const borrowRequest = await BorrowRequest.findOneAndUpdate(
+      { _id: bookId, status: 'approved' },
+      { dueDate: newDueDate },
+      { new: true }
+    );
+
+    if (!borrowRequest) {
+      return res.status(404).json({ message: 'Borrow request not found or already returned' });
+    }
+
+    res.status(200).json({ message: 'Book renewed successfully', borrowRequest });
+  } catch (error) {
+    console.error('Error renewing book:', error);
+    res.status(500).json({ message: 'Error renewing book' });
+  }
+};

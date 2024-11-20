@@ -1,23 +1,23 @@
 <template>
   <div class="add-book-container">
-    <h2>Thêm Sách Mới</h2>
+    <h2>Add new book</h2>
     <form @submit.prevent="addBook" class="add-book-form">
       <div class="form-group">
-        <label>Tiêu đề sách:</label>
-        <input v-model="newBook.title" required placeholder="Nhập tiêu đề sách" />
+        <label>Title:</label>
+        <input v-model="newBook.title" required placeholder="Enter book's title" />
       </div>
       <div class="form-group">
-        <label>Tác giả:</label>
-        <input v-model="newBook.author" required placeholder="Nhập tác giả" />
+        <label>Author:</label>
+        <input v-model="newBook.author" required placeholder="Enter book's author" />
       </div>
        <div class="form-group">
-        <label>Thể loại:</label>
+        <label>Genre:</label>
         <multiselect
           v-model="newBook.genre"
           :options="genres"
           :multiple="true"
           :taggable="true"
-          placeholder="Chọn thể loại"
+          placeholder="Chose genre"
           label="name"
           track-by="name"
           @tag="addGenre"
@@ -26,30 +26,30 @@
         />
       </div>
       <div class="form-group">
-        <label>Tổng số lượng sách:</label>
-        <input type="number" v-model.number="newBook.totalCopies" required placeholder="Nhập tổng số lượng sách" />
+        <label>Total copies:</label>
+        <input type="number" v-model.number="newBook.totalCopies" required placeholder="Enter the number of total copies" />
       </div>
       <div class="form-group">
-        <label>Số lượng sách hiện có:</label>
-        <input type="number" v-model.number="newBook.availableCopies" required placeholder="Nhập số lượng sách hiện có" />
+        <label>Available copies:</label>
+        <input type="number" v-model.number="newBook.availableCopies" required placeholder="Enter the number of availabel copies" />
       </div>
       <div class="form-group">
-        <label>Mô tả sách:</label>
-        <textarea v-model="newBook.description" placeholder="Nhập mô tả về sách"></textarea>
+        <label>Description:</label>
+        <textarea v-model="newBook.description" placeholder="Entern book's description"></textarea>
       </div>
       <div class="form-group">
-        <label>Vị trí sách:</label>
+        <label>Position:</label>
         <div class="position-fields">
-          <label>Tầng</label>
-          <input type="number" v-model.number="newBook.position.floor" required placeholder="Tầng" />
-          <label>Kệ</label>
-          <input type="text" v-model="newBook.position.shelf" required placeholder="Kệ sách" />
-          <label>Khu vực</label>
-          <input type="text" v-model="newBook.position.section" placeholder="Khu vực (tuỳ chọn)" />
+          <label>Floor</label>
+          <input type="number" v-model.number="newBook.position.floor" required placeholder="Floor" />
+          <label>Shelf</label>
+          <input type="text" v-model="newBook.position.shelf" required placeholder="Shelf" />
+          <label>Section</label>
+          <input type="text" v-model="newBook.position.section" placeholder="Section (option)" />
         </div>
       </div>
       <div class="form-group">
-        <label>Hình ảnh sách:</label>
+        <label>Image:</label>
         <input type="file" @change="handleFileChange" multiple />
         <div class="preview-container">
     <div v-for="(image, index) in previewImages" :key="index" class="image-preview">
@@ -58,7 +58,7 @@
   </div>
 
       </div>
-      <button type="submit" class="submit-button">Thêm Sách</button>
+      <button type="submit" class="submit-button">Add book</button>
     </form>
   </div>
 </template>
@@ -126,13 +126,6 @@ export default {
   methods: {
     async addBook() {
       try {
-        //     const token = localStorage.getItem('token');
-        
-        // if (!token) {
-        //   alert('Không tìm thấy token. Bạn cần đăng nhập lại.');
-        //   return;
-        // }
-
         const formData = new FormData();
         formData.append('title', this.newBook.title);
         formData.append('author', this.newBook.author);
@@ -157,7 +150,6 @@ export default {
         const response = await apiClient.post('/admin/add-book', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            // 'Authorization': token,
           },
         });
         

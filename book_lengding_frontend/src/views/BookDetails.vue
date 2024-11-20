@@ -18,30 +18,28 @@
     </div>
 
     <!-- Form Mượn Sách -->
-   <div v-if="showBorrowForm" class="borrow-form">
-      <h4>Borrow Book Form </h4>
-       <div class="borrow-book-info">
-        <h5>{{ book.title }}</h5>
-        <p><strong>Author:</strong> {{ book.author }}</p>
-        <p><strong>Genre:</strong> {{ book.genre.join(', ') }}</p>
+   <b-modal v-model="showBorrowForm" title="Borrow Book Form" ok-title="Confirm Borrow" 
+  cancel-title="Close" @ok="borrowBook">
+      <div class="borrow-book-info">
+          <h5>{{ book.title }}</h5>
+          <p><strong>Author:</strong> {{ book.author }}</p>
+          <p><strong>Genre:</strong> {{ book.genre.join(', ') }}</p>
       </div>
-      <form @submit.prevent="borrowBook">
-        <div class="form-group">
-          <label for="idStudent">Your id Student</label>
-          <input type="text" v-model="idStudent" id="idStudent" required />
-        </div>
-        <div class="form-group">
-          <label for="borrowDate">Borrow Date</label>
-          <input type="date" v-model="borrowDate" id="borrowDate" required />
-        </div>
-        <div class="form-group">
-          <label for="note">Additional Note</label>
-          <textarea v-model="note" id="note" placeholder="Any additional request"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Submit Borrow Request</button>
-        <button type="button" class="btn btn-secondary" @click="cancelBorrowForm">Cancel</button>
-      </form>
-    </div>
+      <b-form @submit.prevent="borrowBook">
+          <b-form-group label="Your id Student" label-for="idStudent">
+              <b-form-input id="idStudent" v-model="idStudent" required></b-form-input>
+          </b-form-group>
+          <b-form-group label="Borrow Date" label-for="borrowDate">
+              <b-form-input id="borrowDate" v-model="borrowDate" type="date" required></b-form-input>
+          </b-form-group>
+          <b-form-group label="Additional Note" label-for="note">
+              <b-form-textarea id="note" v-model="note" placeholder="Any additional request"></b-form-textarea>
+          </b-form-group>
+          <!-- <b-button class="button-submit" type="submit" variant="success">Submit Borrow Request</b-button>
+          <b-button type="button" variant="secondary" @click="cancelBorrowForm">Cancel</b-button> -->
+      </b-form>
+  </b-modal>
+
   </div>
   <div v-else>
     <p>Loading book details...</p>
@@ -193,4 +191,9 @@ export default {
 .borrow-form button {
   margin-right: 10px;
 }
+
+.button-submit{
+  margin-right: 10px;
+}
+
 </style>
