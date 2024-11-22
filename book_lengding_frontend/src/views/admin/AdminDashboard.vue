@@ -29,7 +29,7 @@
             <p class="card-text">
               Add new books to the library system or delete book.
             </p>
-            <router-link to="/admin/add-book" class="btn btn-success">View books</router-link>
+            <router-link to="/admin/add-book" class="btn btn-success">Add books</router-link>
           </div>
         </div>
       </div>

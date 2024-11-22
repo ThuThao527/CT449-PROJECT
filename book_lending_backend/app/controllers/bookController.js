@@ -62,10 +62,9 @@ exports.addBook = async (req, res, next) => {
   console.log('Received request to add book:', req.body);
   const { title, author, genre, totalCopies, availableCopies, description, position } = req.body;
 
-  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`.replace(/\\/g, '/')) : []; // Lấy đường dẫn của các hình ảnh đã tải lên
-
-  // const images = req.files ? req.files.map(file => file.path) : []; 
-  console.log(req.files); // Kiểm tra file có được nhận từ phía client không
+  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`.replace(/\\/g, '/')) : []; // Lấy đường dẫn của các hình ảnh đã tải lên; 
+  
+  console.log(req.files); 
   console.log(req.body);
 
   try {

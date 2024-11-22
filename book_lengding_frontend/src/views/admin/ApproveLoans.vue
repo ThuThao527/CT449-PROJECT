@@ -45,6 +45,7 @@
             <th>Due Date</th>
             <th>Approval Date</th>
             <th>Overdue</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>

@@ -4,9 +4,9 @@
     <section class="hero-section">
       <img src="/image/banner.jpg" alt="Banner" class="hero-banner" />
       <div class="hero-content">
-        <h1>Chào mừng đến với Thư viện của chúng tôi</h1>
-        <p>Khám phá hàng ngàn quyển sách, truyện và nhiều hơn nữa.</p>
-        <router-link to="/catalog" class="cta-button">Khám phá ngay</router-link>
+        <h1>Welcome to our Library</h1>
+        <p>Explore thousands of books, stories and more.</p>
+        <router-link to="/catalog" class="cta-button">Explore Now</router-link>
       </div>
     </section>
     <!-- Featured Books -->
@@ -17,9 +17,9 @@
           <img :src="book.coverImage" class="book-image" :alt="book.title" />
           <div class="book-info">
             <h3>{{ book.title }}</h3>
-            <p class="book-author">Tác giả: {{ book.author }}</p>
+            <p class="book-author">Author: {{ book.author }}</p>
             <router-link :to="`/books/${book._id}`" class="view-button">
-            Xem chi tiết
+            View Details
           </router-link>
           </div>
         </div>
@@ -28,7 +28,7 @@
 
     <!-- Genres -->
     <section class="genres-section">
-      <h2>Thể loại sách</h2>
+      <h2>Book Genres</h2>
       <div class="genres-list">
         <div
           v-for="genre in genres"
@@ -42,13 +42,13 @@
 
     <!-- Recommended Books -->
     <section class="recommended-books">
-      <h2>Sách Gợi Ý</h2>
+      <h2>Recommended Books</h2>
       <div class="book-list">
         <div v-for="book in recommendedBooks" :key="book._id" class="book-card" @click="goToBookDetail(book._id)">
           <img :src="book.coverImage" class="book-image" :alt="book.title" />
           <div class="book-info">
             <h3>{{ book.title }}</h3>
-            <p class="book-author">Tác giả: {{ book.author }}</p>
+            <p class="book-author">Author: {{ book.author }}</p>
           </div>
         </div>
       </div>
@@ -73,7 +73,28 @@ export default {
   data() {
     return {
       featuredBooks: [],
-      genres: ["Tiểu thuyết", "Khoa học", "Lịch sử", "Văn học Việt Nam", "Thiếu nhi"],
+genres: [
+  "Novel", 
+  "Science", 
+  "History", 
+  "Vietnamese Literature", 
+  "Children", 
+  "Fantasy", 
+  "Mystery", 
+  "Romance", 
+  "Horror", 
+  "Self-Help", 
+  "Biography", 
+  "Adventure", 
+  "Poetry", 
+  "Comics", 
+  "Science Fiction", 
+  "Travel", 
+  "Philosophy", 
+  "Art", 
+  "Cooking", 
+  "Health"
+],
       recommendedBooks: [],
     };
   },

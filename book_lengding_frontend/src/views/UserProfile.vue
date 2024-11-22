@@ -63,8 +63,8 @@
           <tr v-for="book in currentlyBorrowed" :key="book.bookId._id">
             <td>{{ book.bookId.title }}</td>
             <td>{{ book.bookId.author }}</td>
-            <td>{{ book.approvalDate }}</td>
-            <td>{{ book.dueDate}} </td>
+            <td>{{ formatDate(book.approvalDate) }}</td>
+            <td>{{ formatDate(book.dueDate) }} </td>
             <td>
               <button class="btn btn-warning btn-sm" @click="openRenewModal(book)">Renew</button>
             </td>
@@ -89,8 +89,8 @@
           <tr v-for="history in borrowHistory" :key="history.bookId._id">
             <td>{{ history.bookId.title }}</td>
             <td>{{ history.bookId.author }}</td>
-            <td>{{ history.approvalDate }}</td>
-            <td>{{ history.returnedDate}}</td>
+            <td>{{ formatDate(history.approvalDate) }}</td>
+            <td>{{ formatDate(history.returnedDate) }}</td>
             <td>
               <input type="number" v-model="history.rating" min="1" max="5" class="form-control d-inline-block w-25" />
               <button class="btn btn-primary btn-sm ms-2" @click="submitReview(history)">Submit</button>
@@ -128,6 +128,13 @@ export default {
     };
   },
   methods: {
+    // Hàm định dạng ngày tháng
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    },
+
     // Lấy thông tin người dùng
     async fetchUserProfile() {
       try {
@@ -205,6 +212,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .user-profile {
